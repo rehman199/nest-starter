@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+import { IUser } from './user.interface';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
+  constructor(@InjectRepository(User) private users: Repository<User>) {}
+
+  create(createUserDto: IUser) {
     return 'This action adds a new user';
   }
 
@@ -12,11 +16,15 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findById(id: string) {
+    return this.users.findOneBy({ id });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  async findByEmail(email: string) {
+    return this.users.findOneBy({ email });
+  }
+
+  update(id: number, updateUserDto: Partial<IUser>) {
     return `This action updates a #${id} user`;
   }
 
