@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -11,14 +11,20 @@ export class User {
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
 
   @Column()
   password: string;
+
+  @BeforeInsert()
+  async hashPassword() {
+    const hashedPassword = await bcrypt.hash(this.password, 10);
+    this.password = hashedPassword;
+  }
 
   async authenticatePassword(pass: string) {
     return await bcrypt.compare(pass, this.password);

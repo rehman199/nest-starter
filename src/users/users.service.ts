@@ -8,8 +8,10 @@ import { IUser } from './user.interface';
 export class UsersService {
   constructor(@InjectRepository(User) private users: Repository<User>) {}
 
-  create(createUserDto: IUser) {
-    return 'This action adds a new user';
+  async create(createUserDto: Partial<IUser>) {
+    const newUser = this.users.create(createUserDto);
+    await this.users.save(newUser);
+    return newUser;
   }
 
   findAll() {
@@ -17,15 +19,22 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    return this.users.findOneBy({ id });
+    return await this.users.findOneBy({ id });
   }
 
   async findByEmail(email: string) {
     return this.users.findOneBy({ email });
   }
 
-  update(id: number, updateUserDto: Partial<IUser>) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: Partial<IUser>) {
+    const userToUpdate = await this.findById(id);
+    if (!userToUpdate) return;
+
+    for (const field in updateUserDto) {
+      userToUpdate[field as keyof IUser] = userToUpdate[field as keyof IUser];
+    }
+    this.users.save(userToUpdate);
+    return userToUpdate;
   }
 
   remove(id: number) {

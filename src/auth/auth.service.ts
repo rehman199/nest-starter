@@ -20,8 +20,10 @@ export class AuthService {
 
   async loginUser(user: IUser) {
     const payload = { username: user.email, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(payload);
+  }
+
+  async registerNewUser(userDto: Partial<IUser>) {
+    return await this.usersService.create(userDto);
   }
 }
